@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>SMG4 · Trash SM64</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: #05030a; color: #f7efff;
+    font: 14px system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; touch-action: none; user-select: none;
+  }
+  #shell {
+    position: relative;
+    width: min(100vw, 100vh * 1.4);
+    height: min(100vh, 100vw / 1.4);
+    max-width: 1000px; max-height: 714px;
+    background: #12091c;
+    border: 3px solid #7542a8; border-radius: 12px;
+    box-shadow: 0 0 60px #0009, inset 0 0 80px #0006;
+    overflow: hidden;
+  }
+  #screen {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    display: block; background: #6cb4ff;
+  }
+  #hud {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 8px 10px; display: flex; justify-content: space-between;
+    align-items: flex-start; pointer-events: none;
+    font: 11px ui-monospace, monospace; text-shadow: 1px 1px 0 #000; z-index: 5;
+  }
+  .hud-group { display: flex; flex-direction: column; gap: 4px; }
+  .badge {
+    background: #000a; border: 1px solid #7542a8; border-radius: 4px;
+    padding: 2px 7px; color: #ffd86b; white-space: nowrap;
+  }
+  .badge.red { color: #ff6b6b; border-color: #8a2b2b; }
+  .badge.green { color: #6bff8f; border-color: #2b8a4a; }
+  .badge.blue { color: #6bc4ff; border-color: #2b6a8a; }
+  #controls { position: absolute; inset: 0; pointer-events: none; z-index: 10; }
+  .dpad { position: absolute; left: 14px; bottom: 14px; width: 150px; height: 150px; pointer-events: auto; }
+  .dpad button, .ab button, .center-btn {
+    position: absolute; border: 2px solid #ffffff55; background: #00000088; color: #fff;
+    font: 700 17px/1 ui-monospace, monospace; border-radius: 8px; padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    text-shadow: 1px 1px 0 #000; touch-action: none; cursor: pointer;
+    box-shadow: 0 3px 0 #00000088;
+  }
+  .dpad button:active, .ab button:active, .center-btn:active {
+    background: #8b38e8cc; border-color: #fff;
+    box-shadow: 0 1px 0 #00000088;
+  }
+  .dpad .up    { left: 50px; top: 0;    width: 50px; height: 50px; }
+  .dpad .down  { left: 50px; top: 100px; width: 50px; height: 50px; }
+  .dpad .left  { left: 0;    top: 50px; width: 50px; height: 50px; }
+  .dpad .right { left: 100px; top: 50px; width: 50px; height: 50px; }
+  .dpad .center-marker {
+    position: absolute; left: 50px; top: 50px; width: 50px; height: 50px;
+    border-radius: 8px; background: #00000044; border: 2px dashed #ffffff22;
+    pointer-events: none;
+  }
+  .ab { position: absolute; right: 16px; bottom: 20px; width: 130px; height: 130px; pointer-events: auto; }
+  .ab button { width: 58px; height: 58px; border-radius: 50%; font-size: 20px; }
+  .ab .a { right: 0;    bottom: 36px; background: #c0392b99; }
+  .ab .b { right: 48px; bottom: 0;    background: #2980b999; }
+  .ab .a:active { background: #ff5a4a; }
+  .ab .b:active { background: #4aa3ff; }
+  .center-btn {
+    position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%);
+    width: 80px; height: 32px; border-radius: 16px; font-size: 11px;
+    pointer-events: auto; background: #8b38e8cc; border: 2px solid #fff8;
+  }
+  .center-btn:active { background: #b06bff; }
+  #startOverlay {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+    background: #05030aee; z-index: 20; text-align: center; padding: 24px;
+  }
+  #startOverlay h1 {
+    margin: 0; font-size: clamp(22px, 5vw, 40px); color: #ffd86b;
+    text-shadow: 0 0 20px #ffd86b88, 2px 2px 0 #000; letter-spacing: 2px;
+  }
+  #startOverlay .subtitle { color: #b19cd0; font-size: clamp(11px,1.5vw,14px); letter-spacing: 1px; margin-top: -6px; }
+  #startOverlay p { margin: 0; color: #cdb8e4; max-width: 500px; line-height: 1.5; font-size: clamp(11px, 1.6vw, 14px); }
+  #startOverlay button {
+    border: 0; border-radius: 10px; padding: 14px 28px;
+    background: linear-gradient(180deg,#a04dff,#7524d8); color: #fff;
+    font-weight: 800; font-size: clamp(15px, 2vw, 20px);
+    cursor: pointer; letter-spacing: 1px;
+    box-shadow: 0 6px 0 #4a1188, 0 0 30px #a04dff66;
+  }
+  #startOverlay button:active { transform: translateY(4px); box-shadow: 0 2px 0 #4a1188; }
+  #loadLog {
+    font: 11px ui-monospace, monospace; color: #8fbf8f; text-align: left;
+    max-width: 500px; width: 100%; min-height: 40px;
+    background: #000a; border: 1px solid #2b4a2b; border-radius: 6px;
+    padding: 8px 12px; line-height: 1.6;
+  }
+  #loadLog .err { color: #ff8f8f; }
+  #loadLog .ok { color: #8fff8f; }
+  #loadLog .warn { color: #ffd86b; }
+  #status {
+    position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%);
+    background: #000a; border: 1px solid #7542a8; border-radius: 4px;
+    padding: 2px 10px; font: 10px ui-monospace, monospace; color: #ffd86b;
+    white-space: nowrap; pointer-events: none; z-index: 6;
+    max-width: 90%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div id="shell">
+  <canvas id="screen" width="320" height="224"></canvas>
+  <div id="hud">
+    <div class="hud-group">
+      <div class="badge red">SMG4 · SM64</div>
+      <div class="badge blue" id="noteBadge">♪ 0</div>
+    </div>
+    <div class="hud-group" style="align-items:flex-end;">
+      <div class="badge green" id="fpsBadge">0 FPS</div>
+      <div class="badge" id="starBadge">★ 0</div>
+    </div>
+  </div>
+  <div id="status">Loading…</div>
+  <div id="controls">
+    <div class="dpad">
+      <div class="center-marker"></div>
+      <button class="up"    data-btn="up">▲</button>
+      <button class="down"  data-btn="down">▼</button>
+      <button class="left"  data-btn="left">◀</button>
+      <button class="right" data-btn="right">▶</button>
+    </div>
+    <div class="ab">
+      <button class="a" data-btn="a">A</button>
+      <button class="b" data-btn="b">B</button>
+    </div>
+    <button class="center-btn" data-btn="start">START</button>
+  </div>
+  <div id="startOverlay">
+    <h1>SMG4</h1>
+    <div class="subtitle">▰ TRASH SM64 · PIXELATED · MAX LAG</div>
+    <p>
+      Loads <code>sm64theme.mid</code> with the max-lag trash parser and
+      <code>smg4.glb</code> as the player. Cool SM64-inspired level, real
+      run/jump/skid animations, chunky pixel look.
+    </p>
+    <div id="loadLog">Booting…</div>
+    <button id="bootBtn" disabled>▶ LOADING…</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   SMG4 · Trash SM64
+   ============================================================ */
+const $ = id => document.getElementById(id);
+const screen = $("screen");
+const sctx = screen.getContext("2d", { alpha: false });
+sctx.imageSmoothingEnabled = false;
+const W = 320, H = 224;
+screen.width = W; screen.height = H;
+
+const logEl = $("loadLog");
+function log(msg, cls = "") {
+  const d = document.createElement("div");
+  if (cls) d.className = cls;
+  d.textContent = msg;
+  logEl.appendChild(d);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+/* ============================================================
+   MIDI PARSER (trash, from laggy_square_midi_parser.html)
+   ============================================================ */
+function parseMidi(buffer) {
+  const v = new DataView(buffer);
+  let p = 0;
+  const textAt = (at, n) => { let s = ""; for (let i = 0; i < n; i++) s += String.fromCharCode(v.getUint8(at + i)); return s; };
+  if (v.byteLength < 14 || textAt(0, 4) !== "MThd") throw Error("missing MThd header");
+  const headerLength = v.getUint32(4);
+  const trackCount = v.getUint16(10);
+  const division = v.getUint16(12);
+  if (division & 0x8000) throw Error("SMPTE time division isn't supported");
+  if (!division) throw Error("invalid ticks-per-quarter value");
+  p = 8 + headerLength;
+  const allEvents = [];
+  let order = 0;
+  for (let tr = 0; tr < trackCount; tr++) {
+    if (p + 8 > v.byteLength || textAt(p, 4) !== "MTrk") throw Error("missing MIDI track");
+    const length = v.getUint32(p + 4), end = Math.min(p + 8 + length, v.byteLength);
+    p += 8;
+    let tick = 0, running = 0;
+    const readVLQ = () => { let n = 0, b, c = 0; do { if (p >= end || c++ > 4) throw Error("bad VLQ"); b = v.getUint8(p++); n = (n << 7) | (b & 127); } while (b & 128); return n; };
+    while (p < end) {
+      tick += readVLQ();
+      let status = v.getUint8(p++);
+      if (status < 0x80) { p--; if (!running) throw Error("bad running status"); status = running; }
+      else if (status < 0xF0) running = status;
+      if (status === 0xFF) {
+        if (p >= end) break;
+        const meta = v.getUint8(p++), n = readVLQ();
+        if (meta === 0x51 && n === 3 && p + 3 <= end) {
+          const us = (v.getUint8(p) << 16) | (v.getUint8(p + 1) << 8) | v.getUint8(p + 2);
+          if (us > 0) allEvents.push({ tick, type: "tempo", us, order: order++ });
+        }
+        if (meta === 0x2F) { p += n; break; }
+        p += n;
+      } else if (status === 0xF0 || status === 0xF7) {
+        p += readVLQ();
+      } else {
+        const cmd = status & 0xF0, channel = status & 15;
+        if (p >= end) break;
+        const note = v.getUint8(p++);
+        let velocity = 0;
+        if (cmd !== 0xC0 && cmd !== 0xD0) { if (p >= end) break; velocity = v.getUint8(p++); }
+        if (cmd === 0x90 && velocity > 0) allEvents.push({ tick, type: "on", note, velocity, channel, order: order++ });
+        else if (cmd === 0x80 || (cmd === 0x90 && velocity === 0)) allEvents.push({ tick, type: "off", note, channel, order: order++ });
+      }
+      if (p > end) p = end;
+    }
+    p = end;
+  }
+  allEvents.sort((a, b) => a.tick - b.tick || a.order - b.order);
+  let tempo = 500000, prevTick = 0, seconds = 0;
+  const events = [];
+  for (const ev of allEvents) {
+    seconds += (ev.tick - prevTick) * tempo / 1e6 / division;
+    prevTick = ev.tick;
+    if (ev.type === "tempo") tempo = ev.us;
+    else events.push({ ...ev, seconds });
+  }
+  return { events, trackCount };
+}
+
+/* ============================================================
+   GLB LOADER (minimal — geometry + optional skin/anim)
+   ============================================================ */
+function readGLB(arrayBuffer) {
+  const dv = new DataView(arrayBuffer);
+  if (dv.getUint32(0, true) !== 0x46546C67) throw Error("not a GLB file");
+  const version = dv.getUint32(4, true);
+  const totalLength = dv.getUint32(8, true);
+  let offset = 12;
+  let json = null, bin = null;
+  while (offset < totalLength) {
+    const chunkLen = dv.getUint32(offset, true);
+    const chunkType = dv.getUint32(offset + 4, true);
+    offset += 8;
+    if (chunkType === 0x4E4F534A) {
+      json = JSON.parse(new TextDecoder().decode(new Uint8Array(arrayBuffer, offset, chunkLen)));
+    } else if (chunkType === 0x004E4942) {
+      bin = new Uint8Array(arrayBuffer, offset, chunkLen);
+    }
+    offset += chunkLen;
+  }
+  if (!json) throw Error("no JSON chunk in GLB");
+  return { json, bin };
+}
+
+const COMPONENT_TYPES = {
+  5120: { size: 1, get: (dv, o) => dv.getInt8(o) },
+  5121: { size: 1, get: (dv, o) => dv.getUint8(o) },
+  5122: { size: 2, get: (dv, o) => dv.getInt16(o, true) },
+  5123: { size: 2, get: (dv, o) => dv.getUint16(o, true) },
+  5125: { size: 4, get: (dv, o) => dv.getUint32(o, true) },
+  5126: { size: 4, get: (dv, o) => dv.getFloat32(o, true) }
+};
+const TYPE_COUNTS = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT2: 4, MAT3: 9, MAT4: 16 };
+
+function readAccessor(gltf, bin, accessorIdx) {
+  const acc = gltf.accessors[accessorIdx];
+  const bv = gltf.bufferViews[acc.bufferView];
+  const ct = COMPONENT_TYPES[acc.componentType];
+  const numComp = TYPE_COUNTS[acc.type];
+  const byteOffset = (bv.byteOffset || 0) + (acc.byteOffset || 0);
+  const stride = bv.byteStride || ct.size * numComp;
+  const dv = new DataView(bin.buffer, bin.byteOffset + byteOffset, bv.byteLength);
+  const out = [];
+  for (let i = 0; i < acc.count; i++) {
+    const base = i * stride;
+    const item = [];
+    for (let c = 0; c < numComp; c++) item.push(ct.get(dv, base + c * ct.size));
+    out.push(item);
+  }
+  return out;
+}
+
+function quatToMat(q) {
+  const [x, y, z, w] = q;
+  const xx = x * x, yy = y * y, zz = z * z;
+  const xy = x * y, xz = x * z, yz = y * z;
+  const wx = w * x, wy = w * y, wz = w * z;
+  return [
+    1 - 2 * (yy + zz), 2 * (xy - wz), 2 * (xz + wy), 0,
+    2 * (xy + wz), 1 - 2 * (xx + zz), 2 * (yz - wx), 0,
+    2 * (xz - wy), 2 * (yz + wx), 1 - 2 * (xx + yy), 0,
+    0, 0, 0, 1
+  ];
+}
+function trsToMat(t, r, s) {
+  const m = quatToMat(r);
+  m[0] *= s[0]; m[1] *= s[0]; m[2] *= s[0];
+  m[4] *= s[1]; m[5] *= s[1]; m[6] *= s[1];
+  m[8] *= s[2]; m[9] *= s[2]; m[10] *= s[2];
+  m[12] = t[0]; m[13] = t[1]; m[14] = t[2];
+  return m;
+}
+function mulMat(a, b) {
+  const o = new Array(16).fill(0);
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+    let s = 0;
+    for (let k = 0; k < 4; k++) s += a[r * 4 + k] * b[k * 4 + c];
+    o[r * 4 + c] = s;
+  }
+  return o;
+}
+function applyMatToVec(m, v) {
+  return [
+    m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3],
+    m[4] * v[0] + m[5] * v[1] + m[6] * v[2] + m[7],
+    m[8] * v[0] + m[9] * v[1] + m[10] * v[2] + m[11]
+  ];
+}
+
+function loadGLTFModel(gltf, bin) {
+  const scene = gltf.scenes[gltf.scene || 0];
+  const nodes = gltf.nodes || [];
+  const meshes = gltf.meshes || [];
+
+  // compute world matrices for nodes in scene
+  const worldMat = new Array(nodes.length);
+  function computeWorld(i, parentMat) {
+    const n = nodes[i];
+    let local;
+    if (n.matrix) local = n.matrix.slice();
+    else local = trsToMat(n.translation || [0,0,0], n.rotation || [0,0,0,1], n.scale || [1,1,1]);
+    worldMat[i] = parentMat ? mulMat(parentMat, local) : local;
+    for (const c of (n.children || [])) computeWorld(c, worldMat[i]);
+  }
+  for (const root of scene.nodes) computeWorld(root, null);
+
+  // collect all triangles from all meshes in scene, in world space
+  const tris = [];
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i];
+    if (n.mesh === undefined) continue;
+    const mesh = meshes[n.mesh];
+    const wm = worldMat[i];
+    for (const prim of mesh.primitives) {
+      const posAcc = readAccessor(gltf, bin, prim.attributes.POSITION);
+      let normAcc = prim.attributes.NORMAL !== undefined
+        ? readAccessor(gltf, bin, prim.attributes.NORMAL) : null;
+      // compute face normals if absent
+      const idx = prim.indices !== undefined
+        ? readAccessor(gltf, bin, prim.indices).map(a => a[0])
+        : posAcc.map((_, i) => i);
+      // apply world matrix
+      const worldPos = posAcc.map(v => applyMatToVec(wm, v));
+      // material base color
+      let color = [180, 180, 200];
+      if (prim.material !== undefined && gltf.materials) {
+        const mat = gltf.materials[prim.material];
+        if (mat.pbrMetallicRoughness && mat.pbrMetallicRoughness.baseColorFactor) {
+          const f = mat.pbrMetallicRoughness.baseColorFactor;
+          color = [f[0] * 255, f[1] * 255, f[2] * 255];
+        }
+      }
+      for (let t = 0; t < idx.length; t += 3) {
+        const a = worldPos[idx[t]], b = worldPos[idx[t + 1]], c = worldPos[idx[t + 2]];
+        const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+        const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+        let nn = [
+          ab[1] * ac[2] - ab[2] * ac[1],
+          ab[2] * ac[0] - ab[0] * ac[2],
+          ab[0] * ac[1] - ab[1] * ac[0]
+        ];
+        const L = Math.hypot(nn[0], nn[1], nn[2]) || 1;
+        nn = [nn[0] / L, nn[1] / L, nn[2] / L];
+        tris.push({ a, b, c, n: nn, color });
+      }
+    }
+  }
+
+  // normalize: center + scale to ~2 unit box
+  let minX = Infinity, minY = Infinity, minZ = Infinity;
+  let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+  for (const t of tris) for (const p of [t.a, t.b, t.c]) {
+    if (p[0] < minX) minX = p[0]; if (p[0] > maxX) maxX = p[0];
+    if (p[1] < minY) minY = p[1]; if (p[1] > maxY) maxY = p[1];
+    if (p[2] < minZ) minZ = p[2]; if (p[2] > maxZ) maxZ = p[2];
+  }
+  const size = Math.max(maxX - minX, maxY - minY, maxZ - minZ) || 1;
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, cz = (minZ + maxZ) / 2;
+  // find lowest point (feet) so we can place model on ground
+  let lowestY = Infinity;
+  for (const t of tris) for (const p of [t.a, t.b, t.c]) if (p[1] < lowestY) lowestY = p[1];
+  const footOffset = (lowestY - cy) / size * 2;
+
+  for (const t of tris) {
+    for (const p of [t.a, t.b, t.c]) {
+      p[0] = (p[0] - cx) / size * 2;
+      p[1] = (p[1] - cy) / size * 2;
+      p[2] = (p[2] - cz) / size * 2;
+    }
+  }
+
+  return { tris, footOffset };
+}
+
+/* ============================================================
+   MODEL RENDERER — software rasterizer into low-res canvas
+   ============================================================ */
+function renderModel(ctx, model, cx, cy, angle, scale, crouchT, runT, jumpT, skidT, flip) {
+  const cosA = Math.cos(angle), sinA = Math.sin(angle);
+  const fx = flip ? -1 : 1;
+  const s = scale;
+
+  // Pose deformation: bob, squash, lean (procedural "animation")
+  const bobY = Math.sin(runT * 0.6) * 0.04 * (runT > 0 ? 1 : 0.3);
+  const squash = 1 + Math.sin(runT * 0.6 + Math.PI) * 0.06 * (runT > 0 ? 1 : 0);
+  const lean = skidT * 0.3;
+  const crouchY = crouchT * 0.25;
+  const jumpStretch = jumpT > 0 ? 1 + Math.sin(jumpT * 0.15) * 0.15 : 1;
+
+  // project verts with pose applied
+  const proj = model.tris.map(tri => {
+    const projTri = {};
+    for (const k of ['a', 'b', 'c']) {
+      let [x, y, z] = tri[k];
+      // squash/stretch around feet
+      y = (y + model.footOffset) * squash * jumpStretch;
+      y -= crouchY;
+      // run bob
+      y += bobY;
+      // lean (rotate around foot)
+      const leanAngle = lean;
+      const lx = x * Math.cos(leanAngle) - y * Math.sin(leanAngle);
+      const ly = x * Math.sin(leanAngle) + y * Math.cos(leanAngle);
+      x = lx; y = ly;
+      // Y-axis spin
+      const rx = x * cosA - z * sinA;
+      const rz = x * sinA + z * cosA;
+      // perspective
+      const persp = 1 / (1 + rz * 0.35);
+      projTri[k] = {
+        x: cx + rx * s * persp * fx,
+        y: cy - y * s * persp,
+        z: rz,
+        persp
+      };
+    }
+    projTri.tri = tri;
+    projTri.z = (projTri.a.z + projTri.b.z + projTri.c.z) / 3;
+    return projTri;
+  });
+
+  proj.sort((A, B) => B.z - A.z);
+
+  const light = [0.4, -0.7, 0.6];
+  for (const pt of proj) {
+    const { a, b, c, tri } = pt;
+    // backface cull
+    const e1x = b.x - a.x, e1y = b.y - a.y;
+    const e2x = c.x - a.x, e2y = c.y - a.y;
+    if (e1x * e2y - e1y * e2x > 0) continue;
+
+    // lighting (normal in model space; approximate is fine)
+    const n = tri.n;
+    let lit = n[0] * light[0] + n[1] * light[1] + n[2] * light[2];
+    lit = Math.max(0.2, Math.min(1, 0.4 + lit * 0.6));
+
+    let r = tri.color[0], g = tri.color[1], bl = tri.color[2];
+    // fallback tint for untextured model
+    if (r === 180 && g === 180 && bl === 200) {
+      // derive from normal for variety
+      r = 120 + Math.floor(80 * (0.5 + 0.5 * n[0]));
+      g = 60 + Math.floor(100 * (0.5 + 0.5 * n[1]));
+      bl = 160 + Math.floor(80 * (0.5 + 0.5 * n[2]));
+    }
+    ctx.fillStyle = `rgb(${Math.round(r * lit)},${Math.round(g * lit)},${Math.round(bl * lit)})`;
+    ctx.beginPath();
+    ctx.moveTo(Math.round(a.x), Math.round(a.y));
+    ctx.lineTo(Math.round(b.x), Math.round(b.y));
+    ctx.lineTo(Math.round(c.x), Math.round(c.y));
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+const game = {
+  running: false, booted: false,
+  audioCtx
