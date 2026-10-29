@@ -54,12 +54,11 @@
     box-shadow: 0 3px 0 #00000088;
   }
   .dpad button:active, .ab button:active, .center-btn:active {
-    background: #8b38e8cc; border-color: #fff;
-    box-shadow: 0 1px 0 #00000088;
+    background: #8b38e8cc; border-color: #fff; box-shadow: 0 1px 0 #00000088;
   }
-  .dpad .up    { left: 50px; top: 0;    width: 50px; height: 50px; }
+  .dpad .up    { left: 50px; top: 0;     width: 50px; height: 50px; }
   .dpad .down  { left: 50px; top: 100px; width: 50px; height: 50px; }
-  .dpad .left  { left: 0;    top: 50px; width: 50px; height: 50px; }
+  .dpad .left  { left: 0;    top: 50px;  width: 50px; height: 50px; }
   .dpad .right { left: 100px; top: 50px; width: 50px; height: 50px; }
   .dpad .center-marker {
     position: absolute; left: 50px; top: 50px; width: 50px; height: 50px;
@@ -80,32 +79,43 @@
   .center-btn:active { background: #b06bff; }
   #startOverlay {
     position: absolute; inset: 0; display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 14px;
-    background: #05030aee; z-index: 20; text-align: center; padding: 24px;
+    align-items: center; justify-content: center; gap: 10px;
+    background: #05030aee; z-index: 20; text-align: center; padding: 18px;
+    overflow-y: auto;
   }
   #startOverlay h1 {
-    margin: 0; font-size: clamp(22px, 5vw, 40px); color: #ffd86b;
+    margin: 0; font-size: clamp(20px, 5vw, 36px); color: #ffd86b;
     text-shadow: 0 0 20px #ffd86b88, 2px 2px 0 #000; letter-spacing: 2px;
   }
-  #startOverlay .subtitle { color: #b19cd0; font-size: clamp(11px,1.5vw,14px); letter-spacing: 1px; margin-top: -6px; }
-  #startOverlay p { margin: 0; color: #cdb8e4; max-width: 500px; line-height: 1.5; font-size: clamp(11px, 1.6vw, 14px); }
+  #startOverlay .subtitle { color: #b19cd0; font-size: clamp(10px,1.4vw,13px); letter-spacing: 1px; margin-top: -6px; }
+  #startOverlay p { margin: 0; color: #cdb8e4; max-width: 520px; line-height: 1.5; font-size: clamp(11px, 1.5vw, 13px); }
   #startOverlay button {
-    border: 0; border-radius: 10px; padding: 14px 28px;
+    border: 0; border-radius: 10px; padding: 12px 24px;
     background: linear-gradient(180deg,#a04dff,#7524d8); color: #fff;
-    font-weight: 800; font-size: clamp(15px, 2vw, 20px);
+    font-weight: 800; font-size: clamp(14px, 1.8vw, 18px);
     cursor: pointer; letter-spacing: 1px;
-    box-shadow: 0 6px 0 #4a1188, 0 0 30px #a04dff66;
+    box-shadow: 0 5px 0 #4a1188;
+    margin: 4px;
   }
-  #startOverlay button:active { transform: translateY(4px); box-shadow: 0 2px 0 #4a1188; }
+  #startOverlay button:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 2px 0 #4a1188; }
+  #startOverlay button:disabled { opacity: .5; cursor: not-allowed; box-shadow: 0 3px 0 #333; background: #444; }
   #loadLog {
-    font: 11px ui-monospace, monospace; color: #8fbf8f; text-align: left;
-    max-width: 500px; width: 100%; min-height: 40px;
+    font: 10px/1.5 ui-monospace, monospace; color: #8fbf8f; text-align: left;
+    max-width: 560px; width: 100%; max-height: 180px; overflow-y: auto;
     background: #000a; border: 1px solid #2b4a2b; border-radius: 6px;
-    padding: 8px 12px; line-height: 1.6;
+    padding: 8px 12px;
   }
   #loadLog .err { color: #ff8f8f; }
   #loadLog .ok { color: #8fff8f; }
   #loadLog .warn { color: #ffd86b; }
+  #loadLog .info { color: #8fbfff; }
+  .fileRow { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; justify-content: center; margin-top: 4px; }
+  .fileRow label {
+    background: #2a1a3e; border: 1px solid #7542a8; border-radius: 6px;
+    padding: 6px 10px; font-size: 11px; cursor: pointer; color: #cdb8e4;
+  }
+  .fileRow input[type=file] { display: none; }
+  .fileRow .okmark { color: #6bff8f; font-size: 11px; padding: 0 4px; }
   #status {
     position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%);
     background: #000a; border: 1px solid #7542a8; border-radius: 4px;
@@ -129,7 +139,7 @@
       <div class="badge" id="starBadge">★ 0</div>
     </div>
   </div>
-  <div id="status">Loading…</div>
+  <div id="status">Booting…</div>
   <div id="controls">
     <div class="dpad">
       <div class="center-marker"></div>
@@ -149,17 +159,27 @@
     <div class="subtitle">▰ TRASH SM64 · PIXELATED · MAX LAG</div>
     <p>
       Loads <code>sm64theme.mid</code> with the max-lag trash parser and
-      <code>smg4.glb</code> as the player. Cool SM64-inspired level, real
-      run/jump/skid animations, chunky pixel look.
+      <code>smg4.glb</code> as the player.
     </p>
-    <div id="loadLog">Booting…</div>
-    <button id="bootBtn" disabled>▶ LOADING…</button>
+    <div id="loadLog"></div>
+    <div class="fileRow">
+      <label>📁 smg4.glb <input id="pickGLB" type="file" accept=".glb,.gltf,.obj"></label>
+      <span class="okmark" id="glbMark">—</span>
+      <label>📁 sm64theme.mid <input id="pickMID" type="file" accept=".mid,.midi,audio/midi"></label>
+      <span class="okmark" id="midMark">—</span>
+    </div>
+    <div class="fileRow">
+      <button id="bootBtn" disabled>▶ LOADING…</button>
+    </div>
+    <p style="font-size:10px;opacity:.55">
+      Must be served over http(s) — GitHub Pages is fine. Opening via <code>file://</code> blocks fetch; use the file pickers above as a fallback.
+    </p>
   </div>
 </div>
 
 <script>
 /* ============================================================
-   SMG4 · Trash SM64
+   SMG4 · Trash SM64  (hardened boot)
    ============================================================ */
 const $ = id => document.getElementById(id);
 const screen = $("screen");
@@ -177,8 +197,40 @@ function log(msg, cls = "") {
   logEl.scrollTop = logEl.scrollHeight;
 }
 
+const state = {
+  model: null,        // {tris, footOffset}
+  modelKind: "none",  // "glb" | "obj" | "fallback"
+  midiEvents: null,
+  songName: "sm64theme.mid",
+  booted: false,
+  running: false,
+  audioCtx: null, playing: false, timers: [], voices: new Map(),
+  player: {
+    x: 80, y: 180, vx: 0, vy: 0,
+    onGround: true, facing: 1, runT: 0, jumpT: 0,
+    crouchT: 0, skidT: 0, angle: 0
+  },
+  input: { up:false, down:false, left:false, right:false, a:false, b:false, start:false },
+  coins: [], stars: [], enemies: [], particles: [],
+  camX: 0, tick: 0, pulse: 0,
+  lastFpsTime: 0, fpsFrames: 0, fps: 0,
+  levelLength: 2600,
+  totalStars: 0, collected: 0,
+  toastMsg: "", toastT: 0,
+  skyPhase: 0,
+  groundY: 180,
+};
+
+function setStatus(msg) { $("status").textContent = msg; }
+function toast(msg) { state.toastMsg = msg; state.toastT = 100; }
+function updateHud() {
+  $("starBadge").textContent = "★ " + state.totalStars;
+  const n = state.midiEvents ? state.midiEvents.filter(e => e.type === "on").length : 0;
+  $("noteBadge").textContent = "♪ " + n;
+}
+
 /* ============================================================
-   MIDI PARSER (trash, from laggy_square_midi_parser.html)
+   MIDI PARSER (trash parser)
    ============================================================ */
 function parseMidi(buffer) {
   const v = new DataView(buffer);
@@ -188,13 +240,13 @@ function parseMidi(buffer) {
   const headerLength = v.getUint32(4);
   const trackCount = v.getUint16(10);
   const division = v.getUint16(12);
-  if (division & 0x8000) throw Error("SMPTE time division isn't supported");
-  if (!division) throw Error("invalid ticks-per-quarter value");
+  if (division & 0x8000) throw Error("SMPTE time division unsupported");
+  if (!division) throw Error("invalid ticks-per-quarter");
   p = 8 + headerLength;
   const allEvents = [];
   let order = 0;
   for (let tr = 0; tr < trackCount; tr++) {
-    if (p + 8 > v.byteLength || textAt(p, 4) !== "MTrk") throw Error("missing MIDI track");
+    if (p + 8 > v.byteLength || textAt(p, 4) !== "MTrk") throw Error("missing MTrk");
     const length = v.getUint32(p + 4), end = Math.min(p + 8 + length, v.byteLength);
     p += 8;
     let tick = 0, running = 0;
@@ -241,11 +293,11 @@ function parseMidi(buffer) {
 }
 
 /* ============================================================
-   GLB LOADER (minimal — geometry + optional skin/anim)
+   GLB PARSER
    ============================================================ */
 function readGLB(arrayBuffer) {
   const dv = new DataView(arrayBuffer);
-  if (dv.getUint32(0, true) !== 0x46546C67) throw Error("not a GLB file");
+  if (dv.getUint32(0, true) !== 0x46546C67) throw Error("not a GLB (bad magic)");
   const version = dv.getUint32(4, true);
   const totalLength = dv.getUint32(8, true);
   let offset = 12;
@@ -261,7 +313,7 @@ function readGLB(arrayBuffer) {
     }
     offset += chunkLen;
   }
-  if (!json) throw Error("no JSON chunk in GLB");
+  if (!json) throw Error("no JSON chunk");
   return { json, bin };
 }
 
@@ -330,12 +382,11 @@ function applyMatToVec(m, v) {
   ];
 }
 
-function loadGLTFModel(gltf, bin) {
+function buildModelFromGLTF(gltf, bin) {
   const scene = gltf.scenes[gltf.scene || 0];
   const nodes = gltf.nodes || [];
   const meshes = gltf.meshes || [];
 
-  // compute world matrices for nodes in scene
   const worldMat = new Array(nodes.length);
   function computeWorld(i, parentMat) {
     const n = nodes[i];
@@ -345,9 +396,8 @@ function loadGLTFModel(gltf, bin) {
     worldMat[i] = parentMat ? mulMat(parentMat, local) : local;
     for (const c of (n.children || [])) computeWorld(c, worldMat[i]);
   }
-  for (const root of scene.nodes) computeWorld(root, null);
+  for (const root of (scene.nodes || [])) computeWorld(root, null);
 
-  // collect all triangles from all meshes in scene, in world space
   const tris = [];
   for (let i = 0; i < nodes.length; i++) {
     const n = nodes[i];
@@ -355,16 +405,12 @@ function loadGLTFModel(gltf, bin) {
     const mesh = meshes[n.mesh];
     const wm = worldMat[i];
     for (const prim of mesh.primitives) {
-      const posAcc = readAccessor(gltf, bin, prim.attributes.POSITION);
-      let normAcc = prim.attributes.NORMAL !== undefined
-        ? readAccessor(gltf, bin, prim.attributes.NORMAL) : null;
-      // compute face normals if absent
-      const idx = prim.indices !== undefined
+      if (prim.attributes.POSITION === undefined) continue;
+      const pos = readAccessor(gltf, bin, prim.attributes.POSITION);
+      const idxArr = prim.indices !== undefined
         ? readAccessor(gltf, bin, prim.indices).map(a => a[0])
-        : posAcc.map((_, i) => i);
-      // apply world matrix
-      const worldPos = posAcc.map(v => applyMatToVec(wm, v));
-      // material base color
+        : pos.map((_, i) => i);
+      const worldPos = pos.map(v => applyMatToVec(wm, v));
       let color = [180, 180, 200];
       if (prim.material !== undefined && gltf.materials) {
         const mat = gltf.materials[prim.material];
@@ -373,8 +419,9 @@ function loadGLTFModel(gltf, bin) {
           color = [f[0] * 255, f[1] * 255, f[2] * 255];
         }
       }
-      for (let t = 0; t < idx.length; t += 3) {
-        const a = worldPos[idx[t]], b = worldPos[idx[t + 1]], c = worldPos[idx[t + 2]];
+      for (let t = 0; t < idxArr.length; t += 3) {
+        const a = worldPos[idxArr[t]], b = worldPos[idxArr[t + 1]], c = worldPos[idxArr[t + 2]];
+        if (!a || !b || !c) continue;
         const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
         const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
         let nn = [
@@ -388,8 +435,9 @@ function loadGLTFModel(gltf, bin) {
       }
     }
   }
+  if (!tris.length) throw Error("GLB contained no triangles");
 
-  // normalize: center + scale to ~2 unit box
+  // normalize to [-1,1] box
   let minX = Infinity, minY = Infinity, minZ = Infinity;
   let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
   for (const t of tris) for (const p of [t.a, t.b, t.c]) {
@@ -399,105 +447,86 @@ function loadGLTFModel(gltf, bin) {
   }
   const size = Math.max(maxX - minX, maxY - minY, maxZ - minZ) || 1;
   const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, cz = (minZ + maxZ) / 2;
-  // find lowest point (feet) so we can place model on ground
   let lowestY = Infinity;
   for (const t of tris) for (const p of [t.a, t.b, t.c]) if (p[1] < lowestY) lowestY = p[1];
   const footOffset = (lowestY - cy) / size * 2;
 
-  for (const t of tris) {
-    for (const p of [t.a, t.b, t.c]) {
-      p[0] = (p[0] - cx) / size * 2;
-      p[1] = (p[1] - cy) / size * 2;
-      p[2] = (p[2] - cz) / size * 2;
-    }
+  for (const t of tris) for (const p of [t.a, t.b, t.c]) {
+    p[0] = (p[0] - cx) / size * 2;
+    p[1] = (p[1] - cy) / size * 2;
+    p[2] = (p[2] - cz) / size * 2;
   }
 
   return { tris, footOffset };
 }
 
 /* ============================================================
-   MODEL RENDERER — software rasterizer into low-res canvas
+   MINIMAL OBJ FALLBACK (in case picker is used with .obj)
+   ============================================================ */
+function buildModelFromOBJ(text) {
+  const verts = [];
+  const faces = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const p = line.split(/\s+/);
+    if (p[0] === "v") verts.push([+p[1], +p[2], +p[3]]);
+    else if (p[0] === "f") {
+      const face = [];
+      for (let i = 1; i < p.length; i++) {
+        const vi = parseInt(p[i].split("/")[0], 10) - 1;
+        if (!isNaN(vi)) face.push(vi);
+      }
+      if (face.length >= 3) faces.push(face);
+    }
+  }
+  if (!verts.length || !faces.length) throw Error("empty OBJ");
+  let minX = Infinity, minY = Infinity, minZ = Infinity;
+  let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+  for (const v of verts) {
+    if (v[0] < minX) minX = v[0]; if (v[0] > maxX) maxX = v[0];
+    if (v[1] < minY) minY = v[1]; if (v[1] > maxY) maxY = v[1];
+    if (v[2] < minZ) minZ = v[2]; if (v[2] > maxZ) maxZ = v[2];
+  }
+  const size = Math.max(maxX - minX, maxY - minY, maxZ - minZ) || 1;
+  const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2, cz = (minZ + maxZ) / 2;
+  let lowestY = Infinity;
+  for (const v of verts) if (v[1] < lowestY) lowestY = v[1];
+  const footOffset = (lowestY - cy) / size * 2;
+  for (const v of verts) {
+    v[0] = (v[0] - cx) / size * 2;
+    v[1] = (v[1] - cy) / size * 2;
+    v[2] = (v[2] - cz) / size * 2;
+  }
+  const tris = [];
+  for (const face of faces) {
+    for (let i = 1; i < face.length - 1; i++) {
+      const a = verts[face[0]], b = verts[face[i]], c = verts[face[i + 1]];
+      const ab = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+      const ac = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+      let nn = [
+        ab[1] * ac[2] - ab[2] * ac[1],
+        ab[2] * ac[0] - ab[0] * ac[2],
+        ab[0] * ac[1] - ab[1] * ac[0]
+      ];
+      const L = Math.hypot(nn[0], nn[1], nn[2]) || 1;
+      nn = [nn[0] / L, nn[1] / L, nn[2] / L];
+      tris.push({ a, b, c, n: nn, color: [180, 180, 200] });
+    }
+  }
+  return { tris, footOffset };
+}
+
+/* ============================================================
+   MODEL RENDERER
    ============================================================ */
 function renderModel(ctx, model, cx, cy, angle, scale, crouchT, runT, jumpT, skidT, flip) {
   const cosA = Math.cos(angle), sinA = Math.sin(angle);
   const fx = flip ? -1 : 1;
   const s = scale;
 
-  // Pose deformation: bob, squash, lean (procedural "animation")
   const bobY = Math.sin(runT * 0.6) * 0.04 * (runT > 0 ? 1 : 0.3);
   const squash = 1 + Math.sin(runT * 0.6 + Math.PI) * 0.06 * (runT > 0 ? 1 : 0);
   const lean = skidT * 0.3;
   const crouchY = crouchT * 0.25;
-  const jumpStretch = jumpT > 0 ? 1 + Math.sin(jumpT * 0.15) * 0.15 : 1;
-
-  // project verts with pose applied
-  const proj = model.tris.map(tri => {
-    const projTri = {};
-    for (const k of ['a', 'b', 'c']) {
-      let [x, y, z] = tri[k];
-      // squash/stretch around feet
-      y = (y + model.footOffset) * squash * jumpStretch;
-      y -= crouchY;
-      // run bob
-      y += bobY;
-      // lean (rotate around foot)
-      const leanAngle = lean;
-      const lx = x * Math.cos(leanAngle) - y * Math.sin(leanAngle);
-      const ly = x * Math.sin(leanAngle) + y * Math.cos(leanAngle);
-      x = lx; y = ly;
-      // Y-axis spin
-      const rx = x * cosA - z * sinA;
-      const rz = x * sinA + z * cosA;
-      // perspective
-      const persp = 1 / (1 + rz * 0.35);
-      projTri[k] = {
-        x: cx + rx * s * persp * fx,
-        y: cy - y * s * persp,
-        z: rz,
-        persp
-      };
-    }
-    projTri.tri = tri;
-    projTri.z = (projTri.a.z + projTri.b.z + projTri.c.z) / 3;
-    return projTri;
-  });
-
-  proj.sort((A, B) => B.z - A.z);
-
-  const light = [0.4, -0.7, 0.6];
-  for (const pt of proj) {
-    const { a, b, c, tri } = pt;
-    // backface cull
-    const e1x = b.x - a.x, e1y = b.y - a.y;
-    const e2x = c.x - a.x, e2y = c.y - a.y;
-    if (e1x * e2y - e1y * e2x > 0) continue;
-
-    // lighting (normal in model space; approximate is fine)
-    const n = tri.n;
-    let lit = n[0] * light[0] + n[1] * light[1] + n[2] * light[2];
-    lit = Math.max(0.2, Math.min(1, 0.4 + lit * 0.6));
-
-    let r = tri.color[0], g = tri.color[1], bl = tri.color[2];
-    // fallback tint for untextured model
-    if (r === 180 && g === 180 && bl === 200) {
-      // derive from normal for variety
-      r = 120 + Math.floor(80 * (0.5 + 0.5 * n[0]));
-      g = 60 + Math.floor(100 * (0.5 + 0.5 * n[1]));
-      bl = 160 + Math.floor(80 * (0.5 + 0.5 * n[2]));
-    }
-    ctx.fillStyle = `rgb(${Math.round(r * lit)},${Math.round(g * lit)},${Math.round(bl * lit)})`;
-    ctx.beginPath();
-    ctx.moveTo(Math.round(a.x), Math.round(a.y));
-    ctx.lineTo(Math.round(b.x), Math.round(b.y));
-    ctx.lineTo(Math.round(c.x), Math.round(c.y));
-    ctx.closePath();
-    ctx.fill();
-  }
-}
-
-/* ============================================================
-   GAME STATE
-   ============================================================ */
-const game = {
-  running: false, booted: false,
-  audioCtx
+  const jumpStretch = jumpT > 0 ? 1 + Math.sin
